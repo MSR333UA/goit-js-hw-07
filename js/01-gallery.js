@@ -1,40 +1,53 @@
 import { galleryItems } from "./gallery-items.js";
 // Change code below this line
+const galleryEl = document.querySelector(".gallery");
 
-const galleryItemsEl = document.querySelector(".gallery");
+galleryEl.insertAdjacentHTML("beforeend", makeGalleryImg(galleryItems));
 
-const selectorGalleryImg = (img) => {
-  return img
+export function makeGalleryImg(galleryItems) {
+  return galleryItems
     .map(({ preview, original, description }) => {
-      return `<div class="gallery__item"><a class="gallery__link" href=${original}><img class= "gallery__image" src="${preview}" data-source =${original} alt="${description}"></div>`;
+      return `<div class="gallery__item">
+  <a class="gallery__link" href="${original}">
+    <img
+      class="gallery__image"
+      src="${preview}"
+      data-source="${original}"
+      alt="${description}"
+    />
+  </a>
+</div>
+`;
     })
     .join("");
-};
+}
+galleryEl.addEventListener("click", onGalleryContainerClick);
 
-const cardImagesMarkup = selectorGalleryImg(galleryItems);
-
-galleryItemsEl.insertAdjacentHTML("afterbegin", cardImagesMarkup);
-
-galleryItemsEl.addEventListener("click", selectGalleryImgEl);
-
-function selectGalleryImgEl(event) {
+function onGalleryContainerClick(event) {
   event.preventDefault();
-  if (event.target.nodeName !== "IMG") {
+  if (!event.target.classList.contains("gallery__image")) {
     return;
   }
   const instance = basicLightbox.create(
-    `<img src="${event.target.dataset.source}" width="800" height="600">`
+    `
+   <img src="${event.target.dataset.source}" alt="${event.target.alt}">
+`,
+    {
+      onClose: (instance) => {
+        window.removeEventListener("keydown", onEscKeyPress);
+      },
+    }
   );
   instance.show();
 
-  const onKeydownEsc = (event) => {
-    console.log(event.code);
+  window.addEventListener("keydown", onEscKeyPress);
+
+  function onEscKeyPress(event) {
     if (event.code === "Escape") {
       instance.close();
     }
-  };
-
-  window.addEventListener("keydown", onKeydownEsc);
+    console.log(event.code);
+  }
 }
 
 console.log(galleryItems);
